@@ -346,12 +346,12 @@ body {
 /* Стили для хинтов */
 .ymaps-2-1-79-hint {
     background-color: #004499 !important; /* Темно-синий из бренд-бука */
-    color: #FFFFFF !important; /* Белый текст */
+    color: #000000 !important; /* Черный текст */
     border-radius: var(--border-radius) !important;
     font-family: var(--font-family) !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    padding: 8px 12px !important;
+    padding: 0 !important; /* Убираем padding */
     box-shadow: none !important; /* Убираем тень */
     border: none !important; /* Убираем обводку */
 }

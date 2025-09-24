@@ -88,13 +88,13 @@ async function loadRouteData() {
         updateStatistics(data);
         
         return data;
-    } catch (error) {
+        } catch (error) {
         console.error('❌ Ошибка загрузки маршрутных данных:', error);
         throw error;
+        }
     }
-}
 
-/**
+    /**
  * Загрузка встроенных данных маршрутной сети
  */
 function loadEmbeddedData() {
@@ -182,10 +182,10 @@ function initializeMap() {
     } catch (error) {
         console.error('❌ Ошибка при инициализации карты:', error);
         showErrorMessage('Не удалось загрузить карту. Проверьте подключение к интернету.');
+        }
     }
-}
 
-/**
+    /**
  * Добавление маркеров аэропортов
  */
 function addAirportMarkers() {
@@ -230,15 +230,8 @@ function addAirportMarkers() {
                 coordinates: [cityData.coords[0], cityData.coords[1]] // Яндекс использует [широта, долгота]
             },
             properties: {
-                balloonContentHeader: cityData.name,
-                balloonContentBody: `
-                    <strong>${isTyumen ? 'Главный региональный хаб' : isHub ? 'Основной хаб' : 'Аэропорт'} ЮТэйр</strong><br>
-                    Код: ${cityCode}<br>
-                    Рейсов: ${flightCount}
-                `,
-                balloonContentFooter: `Координаты: ${cityData.coords[0].toFixed(4)}, ${cityData.coords[1].toFixed(4)}`,
                 clusterCaption: cityData.name,
-                hintContent: cityData.name,
+                hintContent: `${cityData.name}<br>${isTyumen ? 'Главный региональный хаб' : isHub ? 'Основной хаб' : 'Аэропорт'} ЮТэйр<br>Код: ${cityCode}<br>Рейсов: ${flightCount}<br>Координаты: ${cityData.coords[0].toFixed(4)}, ${cityData.coords[1].toFixed(4)}`,
                 iconContent: isTyumen ? '🏙️' : isHub ? '🏢' : '✈️'
             },
             options: {
@@ -268,7 +261,7 @@ function addAirportMarkers() {
         
         if (feature) {
             const cityCode = Object.keys(CONFIG.cities)[objectId];
-            const cityName = feature.properties.balloonContentHeader;
+            const cityName = feature.properties.clusterCaption;
             
             console.log(`🏙️ Выбран город: ${cityName} (${cityCode})`);
             filterRoutesByCity(cityCode, cityName);
@@ -530,10 +523,10 @@ function showAllRoutes() {
             });
             console.log('✅ Карта подогнана под все маршруты');
         }
+        }
     }
-}
 
-/**
+    /**
  * Сброс вида карты к начальному состоянию
  */
 function resetMapView() {
