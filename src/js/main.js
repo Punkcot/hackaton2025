@@ -22,8 +22,11 @@ const CONFIG = {
 // Глобальные переменные
 let yandexMap;
 let routeLines = [];
+let allRouteLines = []; // Все маршруты для фильтрации
 let markers = [];
 let objectManager;
+let selectedCity = null; // Выбранный город
+let selectedWeekdays = []; // Выбранные дни недели
 
     /**
      * Инициализация приложения
@@ -216,6 +219,7 @@ function addAirportMarkers() {
     Object.entries(CONFIG.cities).forEach(([cityCode, cityData], index) => {
         const isHub = CONFIG.mainHubs.includes(cityCode);
         const flightCount = cityStats[cityCode] || 0;
+        const isTyumen = cityCode === 'ТЮМ'; // Особая метка для Тюмени
         
         // Создание объекта маркера
         const feature = {
@@ -228,18 +232,19 @@ function addAirportMarkers() {
             properties: {
                 balloonContentHeader: cityData.name,
                 balloonContentBody: `
-                    <strong>${isHub ? 'Основной хаб' : 'Аэропорт'} ЮТэйр</strong><br>
+                    <strong>${isTyumen ? 'Главный региональный хаб' : isHub ? 'Основной хаб' : 'Аэропорт'} ЮТэйр</strong><br>
                     Код: ${cityCode}<br>
                     Рейсов: ${flightCount}
                 `,
                 balloonContentFooter: `Координаты: ${cityData.coords[0].toFixed(4)}, ${cityData.coords[1].toFixed(4)}`,
                 clusterCaption: cityData.name,
                 hintContent: cityData.name,
-                iconContent: isHub ? '🏢' : '✈️'
+                iconContent: isTyumen ? '🏙️' : isHub ? '🏢' : '✈️'
             },
             options: {
-                preset: 'islands#blueIcon',
-                iconColor: isHub ? '#004499' : '#0066CC'
+                preset: isTyumen ? 'islands#redCircleIcon' : 'islands#blueIcon',
+                iconColor: isTyumen ? '#004499' : isHub ? '#004499' : '#0066CC',
+                iconImageSize: isTyumen ? [60, 60] : [30, 30] // В 2 раза крупнее для Тюмени
             }
         };
         
@@ -255,6 +260,20 @@ function addAirportMarkers() {
     
     console.log('📍 Добавляемые маркеры:', collection);
     objectManager.add(collection);
+    
+    // Обработчик клика по маркерам городов
+    objectManager.events.add('click', function(e) {
+        const objectId = e.get('objectId');
+        const feature = features.find(f => f.id === objectId);
+        
+        if (feature) {
+            const cityCode = Object.keys(CONFIG.cities)[objectId];
+            const cityName = feature.properties.balloonContentHeader;
+            
+            console.log(`🏙️ Выбран город: ${cityName} (${cityCode})`);
+            filterRoutesByCity(cityCode, cityName);
+        }
+    });
 
     console.log(`✅ Добавлено ${Object.keys(CONFIG.cities).length} маркеров аэропортов`);
 }
@@ -289,26 +308,20 @@ function addRoutes() {
     const sortedRoutes = [...CONFIG.routes].sort((a, b) => b.flights - a.flights);
     
     sortedRoutes.forEach((route, index) => {
-        // Определяем толщину линии в зависимости от количества рейсов
-        const weight = Math.min(2 + Math.log(route.flights), 8);
-        const opacity = Math.min(0.5 + route.flights / 100, 0.9);
+        // Делаем линии тонкими и контрастными
+        const weight = 2; // Фиксированная тонкая толщина
+        const opacity = 0.8; // Высокая контрастность
         
-        // Цвет зависит от интенсивности маршрута
-        const color = route.flights > 30 ? '#004499' : 
-                     route.flights > 15 ? '#0066CC' : '#3399FF';
+        // Контрастные цвета в зависимости от интенсивности маршрута
+        const color = route.flights > 30 ? '#000080' : // Темно-синий
+                     route.flights > 15 ? '#0066CC' : // Синий ЮТэйр
+                     '#1E90FF'; // Ярко-синий
         
-        // Создание плавной линии маршрута
-        let pathCoords;
-        if (route.path && route.path.length > 2) {
-            // Используем плавный путь, если он есть
-            pathCoords = route.path.map(point => [point[0], point[1]]);
-        } else {
-            // Создаем простую линию, если плавного пути нет
-            pathCoords = [
-                [route.from[0], route.from[1]],  // Начальная точка
-                [route.to[0], route.to[1]]       // Конечная точка
-            ];
-        }
+        // Создание прямой линии маршрута
+        const pathCoords = [
+            [route.from[0], route.from[1]],  // Начальная точка
+            [route.to[0], route.to[1]]       // Конечная точка
+        ];
         
         const routeLine = new ymaps.Polyline(pathCoords, {
             balloonContentHeader: route.name,
@@ -322,14 +335,133 @@ function addRoutes() {
             strokeStyle: route.flights > 20 ? 'solid' : 'dash' // Сплошные линии для основных маршрутов
         });
 
+        // Сохраняем информацию о маршруте для фильтрации
+        routeLine.routeData = {
+            from_code: route.from_code || route.code?.split('-')[0],
+            to_code: route.to_code || route.code?.split('-')[1],
+            route: route
+        };
+
         // Добавление маршрута на карту
         console.log(`🛫 Добавляем маршрут: ${route.name}`, routeLine);
         yandexMap.geoObjects.add(routeLine);
         routeLines.push(routeLine);
+        allRouteLines.push(routeLine); // Сохраняем все маршруты
     });
 
     console.log(`✅ Добавлено ${CONFIG.routes.length} маршрутов`);
     console.log(`📊 Самый загруженный: ${sortedRoutes[0]?.name} (${sortedRoutes[0]?.flights} рейсов)`);
+}
+
+/**
+ * Фильтрация маршрутов по выбранному городу
+ */
+function filterRoutesByCity(cityCode, cityName) {
+    console.log(`🔍 Фильтрация маршрутов для города: ${cityName} (${cityCode})`);
+    
+    if (selectedCity === cityCode) {
+        // Если тот же город выбран повторно - сбрасываем фильтр по городу
+        selectedCity = null;
+        console.log('🌐 Сброшен фильтр по городу');
+    } else {
+        selectedCity = cityCode;
+    }
+    
+    // Применяем все фильтры
+    applyFilters();
+}
+
+/**
+ * Показать все маршруты на карте
+ */
+function showAllRoutesOnMap() {
+    allRouteLines.forEach(routeLine => {
+        yandexMap.geoObjects.add(routeLine);
+    });
+    selectedCity = null;
+    selectedWeekdays = [];
+    
+    // Сбрасываем активные кнопки дней недели
+    document.querySelectorAll('.btn-weekday').forEach(btn => {
+        btn.classList.remove('active');
+    });
+}
+
+/**
+ * Переключение фильтра по дням недели
+ */
+function toggleWeekdayFilter(day, button) {
+    const dayIndex = selectedWeekdays.indexOf(day);
+    
+    if (dayIndex > -1) {
+        // Убираем день из фильтра
+        selectedWeekdays.splice(dayIndex, 1);
+        button.classList.remove('active');
+    } else {
+        // Добавляем день в фильтр
+        selectedWeekdays.push(day);
+        button.classList.add('active');
+    }
+    
+    console.log(`📅 Фильтр по дням: ${selectedWeekdays.join(', ')}`);
+    applyFilters();
+}
+
+/**
+ * Применение всех активных фильтров
+ */
+function applyFilters() {
+    // Скрываем все маршруты
+    allRouteLines.forEach(routeLine => {
+        yandexMap.geoObjects.remove(routeLine);
+    });
+    
+    let filteredCount = 0;
+    
+    // Показываем маршруты согласно фильтрам
+    allRouteLines.forEach(routeLine => {
+        const routeData = routeLine.routeData;
+        let showRoute = true;
+        
+        // Фильтр по городу
+        if (selectedCity && routeData) {
+            if (routeData.from_code !== selectedCity && routeData.to_code !== selectedCity) {
+                showRoute = false;
+            }
+        }
+        
+        // Фильтр по дням недели (проверяем частоту полетов)
+        if (selectedWeekdays.length > 0 && routeData && routeData.route) {
+            // Симулируем проверку дней недели (в реальных данных была бы частота @freq)
+            // Для демонстрации считаем, что рейсы с большим количеством летают чаще
+            const flightFreq = routeData.route.flights || 0;
+            
+            // Высокочастотные рейсы (>20) - ежедневно (1-7)
+            // Средние рейсы (10-20) - рабочие дни (1-5) 
+            // Редкие рейсы (<10) - выходные (6-7)
+            let routeWeekdays = [];
+            if (flightFreq > 20) {
+                routeWeekdays = [1, 2, 3, 4, 5, 6, 7]; // Ежедневно
+            } else if (flightFreq > 10) {
+                routeWeekdays = [1, 2, 3, 4, 5]; // Рабочие дни
+            } else {
+                routeWeekdays = [6, 7]; // Выходные
+            }
+            
+            // Проверяем пересечение выбранных дней с днями маршрута
+            const hasMatchingDay = selectedWeekdays.some(day => routeWeekdays.includes(day));
+            if (!hasMatchingDay) {
+                showRoute = false;
+            }
+        }
+        
+        if (showRoute) {
+            yandexMap.geoObjects.add(routeLine);
+            filteredCount++;
+        }
+    });
+    
+    console.log(`✅ Применены фильтры: показано ${filteredCount} маршрутов`);
 }
 
 /**
@@ -349,6 +481,15 @@ function bindEventListeners() {
     if (resetViewBtn) {
         resetViewBtn.addEventListener('click', resetMapView);
     }
+    
+    // Кнопки фильтра по дням недели
+    const weekdayButtons = document.querySelectorAll('.btn-weekday');
+    weekdayButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const day = parseInt(this.dataset.day);
+            toggleWeekdayFilter(day, this);
+        });
+    });
 
     // Плавная прокрутка для навигации
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -389,17 +530,21 @@ function showAllRoutes() {
             });
             console.log('✅ Карта подогнана под все маршруты');
         }
-        }
     }
+}
 
-    /**
+/**
  * Сброс вида карты к начальному состоянию
  */
 function resetMapView() {
     console.log('🔄 Сброс вида карты...');
     
     yandexMap.setCenter(CONFIG.map.center, CONFIG.map.zoom);
-    console.log('✅ Вид карты сброшен');
+    
+    // Также показываем все маршруты при сбросе
+    showAllRoutesOnMap();
+    
+    console.log('✅ Вид карты сброшен, показаны все маршруты');
 }
 
 /**

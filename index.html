@@ -19,7 +19,6 @@
             <div class="header-content">
                 <div class="logo">
                     <h1>ЮТэйр</h1>
-                    <span class="tagline">Авиакомпания</span>
                 </div>
                 <nav class="navigation">
                     <ul>
@@ -33,21 +32,45 @@
     </header>
 
     <main class="main-content">
-        <section class="hero-section">
-            <div class="container">
-                <h2>Карта авиамаршрутов ЮТэйр</h2>
-                <p>Исследуйте направления полетов нашей авиакомпании</p>
-            </div>
-        </section>
-
         <section class="map-section" id="map">
             <div class="container">
-                <div class="map-controls">
-                    <button class="btn btn-primary" id="showAllRoutes">Показать все маршруты</button>
+        <div class="map-controls">
                     <button class="btn btn-secondary" id="resetView">Сбросить вид</button>
+                    <button class="btn btn-primary" id="showAllRoutes">Сбросить фильтр</button>
+                    
+                    <div class="weekday-filter">
+                        <span class="filter-label">Дни недели:</span>
+                        <div class="weekday-buttons">
+                            <button class="btn-weekday" data-day="1">Пн</button>
+                            <button class="btn-weekday" data-day="2">Вт</button>
+                            <button class="btn-weekday" data-day="3">Ср</button>
+                            <button class="btn-weekday" data-day="4">Чт</button>
+                            <button class="btn-weekday" data-day="5">Пт</button>
+                            <button class="btn-weekday" data-day="6">Сб</button>
+                            <button class="btn-weekday" data-day="7">Вс</button>
+                        </div>
+                    </div>
                 </div>
                 <div id="mapContainer" class="map-container">
                     <!-- Карта будет загружена здесь -->
+                </div>
+                
+                <div class="map-legend">
+                    <h4>Легенда карты</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-line" style="background: linear-gradient(90deg, #000080 0%, #0066CC 50%, #1E90FF 100%); height: 2px;"></div>
+                            <span>Цвет линий: интенсивность рейсов (темно-синий - высокая, ярко-синий - низкая)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-line-solid"></div>
+                            <span>Сплошная линия: основные маршруты (>20 рейсов/неделя)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-line-dashed"></div>
+                            <span>Пунктирная линия: дополнительные маршруты (≤20 рейсов/неделя)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
