@@ -1,0 +1,413 @@
+/**
+ * @file: main.css
+ * @description: Основные стили для веб-приложения ЮТэйр с картой маршрутов
+ * @dependencies: Leaflet CSS, Google Fonts (Inter)
+ * @created: 2025-09-16
+ */
+
+/* ========== ПЕРЕМЕННЫЕ CSS ========== */
+:root {
+    /* Фирменные цвета ЮТэйр */
+    --utair-blue: #0066CC;
+    --utair-dark-blue: #004499;
+    --utair-light-blue: #3399FF;
+    --utair-white: #FFFFFF;
+    --utair-gray: #F5F5F5;
+    --utair-dark-gray: #666666;
+    --utair-text: #333333;
+    
+    /* Шрифты */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    
+    /* Размеры */
+    --container-max-width: 1200px;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 10px rgba(0, 102, 204, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* ========== БАЗОВЫЕ СТИЛИ ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    color: var(--utair-text);
+    background-color: var(--utair-gray);
+}
+
+.container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========== КНОПКИ ========== */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-family: var(--font-family);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: var(--utair-blue);
+    color: var(--utair-white);
+}
+
+.btn-primary:hover {
+    background-color: var(--utair-dark-blue);
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
+}
+
+.btn-secondary {
+    background-color: var(--utair-white);
+    color: var(--utair-blue);
+    border: 2px solid var(--utair-blue);
+}
+
+.btn-secondary:hover {
+    background-color: var(--utair-blue);
+    color: var(--utair-white);
+}
+
+/* ========== ХЕДЕР ========== */
+.header {
+    background-color: var(--utair-white);
+    box-shadow: var(--box-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+}
+
+.logo h1 {
+    color: var(--utair-blue);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.logo .tagline {
+    color: var(--utair-dark-gray);
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.navigation ul {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+.navigation a {
+    color: var(--utair-text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+}
+
+.navigation a:hover {
+    color: var(--utair-blue);
+    background-color: var(--utair-gray);
+}
+
+/* ========== ОСНОВНОЙ КОНТЕНТ ========== */
+.main-content {
+    min-height: calc(100vh - 200px);
+}
+
+.hero-section {
+    background: linear-gradient(135deg, var(--utair-blue) 0%, var(--utair-light-blue) 100%);
+    color: var(--utair-white);
+    padding: 60px 0;
+    text-align: center;
+}
+
+.hero-section h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.hero-section p {
+    font-size: 18px;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+/* ========== СЕКЦИЯ КАРТЫ ========== */
+.map-section {
+    padding: 40px 0;
+    background-color: var(--utair-white);
+}
+
+.map-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.map-container {
+    width: 100%;
+    height: 500px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    position: relative;
+}
+
+#mapContainer {
+    z-index: 1;
+}
+
+/* Стили для элементов Яндекс.Карт */
+.ymaps-2-1-79-controls__toolbar {
+    background-color: var(--utair-white) !important;
+    border-radius: var(--border-radius) !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+.ymaps-2-1-79-controls-button {
+    background-color: var(--utair-white) !important;
+    color: var(--utair-blue) !important;
+    border: 1px solid var(--utair-blue) !important;
+    border-radius: var(--border-radius) !important;
+}
+
+.ymaps-2-1-79-controls-button:hover {
+    background-color: var(--utair-blue) !important;
+    color: var(--utair-white) !important;
+}
+
+/* Стили для балунов Яндекс.Карт */
+.ymaps-2-1-79-balloon__content {
+    font-family: var(--font-family) !important;
+}
+
+.ymaps-2-1-79-balloon__header {
+    color: var(--utair-blue) !important;
+    font-weight: 600 !important;
+}
+
+.ymaps-2-1-79-balloon__body {
+    color: var(--utair-text) !important;
+    line-height: 1.4 !important;
+}
+
+.ymaps-2-1-79-balloon__footer {
+    color: var(--utair-dark-gray) !important;
+    font-size: 12px !important;
+}
+
+/* Кастомизация кластеров */
+.ymaps-2-1-79-cluster-icon {
+    background-color: var(--utair-blue) !important;
+    color: var(--utair-white) !important;
+    border-radius: 50% !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+/* Стили для хинтов */
+.ymaps-2-1-79-hint {
+    background-color: var(--utair-blue) !important;
+    color: var(--utair-white) !important;
+    border-radius: var(--border-radius) !important;
+    font-family: var(--font-family) !important;
+    font-size: 14px !important;
+    padding: 6px 12px !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+/* Убираем водяные знаки и копирайты */
+.ymaps-2-1-79-copyright,
+.ymaps-2-1-79-logo,
+.ymaps-2-1-79-map-copyrights-promo {
+    display: none !important;
+}
+
+/* Стили для контейнера карты */
+#mapContainer [class*="ymaps"] {
+    font-family: var(--font-family) !important;
+}
+
+/* ========== ИНФОРМАЦИОННАЯ СЕКЦИЯ ========== */
+.info-section {
+    padding: 60px 0;
+    background-color: var(--utair-gray);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.info-card {
+    background-color: var(--utair-white);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 102, 204, 0.15);
+}
+
+.info-card h3 {
+    color: var(--utair-blue);
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.info-card p {
+    color: var(--utair-dark-gray);
+    line-height: 1.6;
+}
+
+/* ========== ФУТЕР ========== */
+.footer {
+    background-color: var(--utair-dark-blue);
+    color: var(--utair-white);
+    padding: 40px 0;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.footer-section h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--utair-light-blue);
+}
+
+.footer-section p {
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+/* ========== АДАПТИВНОСТЬ ========== */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .navigation ul {
+        gap: 15px;
+    }
+    
+    .hero-section h2 {
+        font-size: 28px;
+    }
+    
+    .hero-section p {
+        font-size: 16px;
+    }
+    
+    .map-controls {
+        flex-direction: column;
+    align-items: center;
+    }
+    
+    .map-container {
+        height: 400px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .hero-section {
+        padding: 40px 0;
+    }
+    
+    .hero-section h2 {
+        font-size: 24px;
+    }
+    
+    .map-container {
+        height: 300px;
+    }
+    
+    .info-card {
+        padding: 20px;
+    }
+}
+
+/* ========== АНИМАЦИИ ========== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* ========== ДОПОЛНИТЕЛЬНЫЕ УТИЛИТЫ ========== */
+.text-center {
+    text-align: center;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+/* Плавная прокрутка */
+html {
+    scroll-behavior: smooth;
+}

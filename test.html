@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест ЮТэйр - Карта маршрутов</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #mapContainer { width: 100%; height: 500px; border: 1px solid #ccc; margin: 20px 0; }
+        .status { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .info { background: #e3f2fd; color: #1565c0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест ЮТэйр - Карта маршрутов</h1>
+    
+    <div id="status" class="status info">
+        ⏳ Инициализация...
+    </div>
+    
+    <div id="mapContainer"></div>
+    
+    <div id="stats" style="display: none;">
+        <h3>📊 Статистика:</h3>
+        <ul>
+            <li>Городов: <span id="cityCount">0</span></li>
+            <li>Маршрутов: <span id="routeCount">0</span></li>
+            <li>Рейсов: <span id="flightCount">0</span></li>
+        </ul>
+    </div>
+
+    <!-- Яндекс.Карты API -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    
+    <!-- Данные маршрутов ЮТэйр -->
+    <script src="src/js/utair-data.js"></script>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        const statsDiv = document.getElementById('stats');
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            console.log(message);
+        }
+        
+        function updateStats(cities, routes, flights) {
+            document.getElementById('cityCount').textContent = cities;
+            document.getElementById('routeCount').textContent = routes;
+            document.getElementById('flightCount').textContent = flights;
+            statsDiv.style.display = 'block';
+        }
+        
+        // Проверяем загрузку данных
+        if (typeof UTAIR_DATA === 'undefined') {
+            updateStatus('❌ Данные ЮТэйр не загружены!', 'error');
+        } else {
+            updateStatus(`✅ Данные загружены: ${Object.keys(UTAIR_DATA.cities).length} городов, ${UTAIR_DATA.routes.length} маршрутов`, 'success');
+            
+            const totalFlights = UTAIR_DATA.routes.reduce((sum, route) => sum + route.flights, 0);
+            updateStats(Object.keys(UTAIR_DATA.cities).length, UTAIR_DATA.routes.length, totalFlights);
+        }
+        
+        // Инициализация Яндекс.Карты
+        ymaps.ready(function() {
+            updateStatus('🗺️ Яндекс.Карты API загружен', 'success');
+            
+            try {
+                // Создание карты
+                const yandexMap = new ymaps.Map('mapContainer', {
+                    center: [58.0, 65.0],
+                    zoom: 5,
+                    controls: ['zoomControl', 'typeSelector']
+                });
+                
+                updateStatus('✅ Карта создана успешно', 'success');
+                
+                // Добавляем маркеры городов
+                if (typeof UTAIR_DATA !== 'undefined') {
+                    const features = [];
+                    
+                    Object.entries(UTAIR_DATA.cities).forEach(([code, city], index) => {
+                        features.push({
+                            type: 'Feature',
+                            id: index,
+                            geometry: {
+                                type: 'Point',
+                                coordinates: city.coords
+                            },
+                            properties: {
+                                balloonContentHeader: city.name,
+                                balloonContentBody: `Код: ${code}`,
+                                hintContent: city.name,
+                                iconContent: '✈️'
+                            },
+                            options: {
+                                preset: 'islands#blueIcon'
+                            }
+                        });
+                    });
+                    
+                    const objectManager = new ymaps.ObjectManager();
+                    objectManager.add({
+                        type: 'FeatureCollection',
+                        features: features
+                    });
+                    yandexMap.geoObjects.add(objectManager);
+                    
+                    // Добавляем маршруты
+                    UTAIR_DATA.routes.slice(0, 10).forEach(route => { // Показываем только первые 10 для теста
+                        const routeLine = new ymaps.Polyline([
+                            route.from,
+                            route.to
+                        ], {
+                            balloonContentHeader: route.name,
+                            balloonContentBody: `Рейсов: ${route.flights}`,
+                            hintContent: route.name
+                        }, {
+                            strokeColor: '#0066CC',
+                            strokeWidth: 3,
+                            strokeOpacity: 0.7
+                        });
+                        
+                        yandexMap.geoObjects.add(routeLine);
+                    });
+                    
+                    updateStatus(`🎯 Отображено ${features.length} городов и ${Math.min(10, UTAIR_DATA.routes.length)} маршрутов`, 'success');
+                } else {
+                    updateStatus('⚠️ Карта создана, но данные маршрутов не найдены', 'error');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Ошибка создания карты: ${error.message}`, 'error');
+                console.error('Ошибка:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+
+

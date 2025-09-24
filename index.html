@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЮТэйр - Карта маршрутов</title>
+    
+    <!-- Яндекс.Карты API (подключается в JavaScript) -->
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="src/css/main.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>ЮТэйр</h1>
+                    <span class="tagline">Авиакомпания</span>
+                </div>
+                <nav class="navigation">
+                    <ul>
+                        <li><a href="#map">Карта маршрутов</a></li>
+                        <li><a href="#info">Информация</a></li>
+                        <li><a href="#contacts">Контакты</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="container">
+                <h2>Карта авиамаршрутов ЮТэйр</h2>
+                <p>Исследуйте направления полетов нашей авиакомпании</p>
+            </div>
+        </section>
+
+        <section class="map-section" id="map">
+            <div class="container">
+                <div class="map-controls">
+                    <button class="btn btn-primary" id="showAllRoutes">Показать все маршруты</button>
+                    <button class="btn btn-secondary" id="resetView">Сбросить вид</button>
+                </div>
+                <div id="mapContainer" class="map-container">
+                    <!-- Карта будет загружена здесь -->
+                </div>
+            </div>
+        </section>
+
+        <section class="info-section" id="info">
+            <div class="container">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>Маршрутная сеть</h3>
+                        <p><strong id="routeCount">301</strong> активных маршрута по <strong id="cityCount">68</strong> городам</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>Основные хабы</h3>
+                        <p>Москва, Сургут и Тюмень - главные узлы сети</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>География полетов</h3>
+                        <p>От России до <strong>Турции</strong> и <strong>ОАЭ</strong> - <strong id="flightCount">1000+</strong> рейсов в неделю</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" id="contacts">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ЮТэйр</h4>
+                    <p>Российская авиакомпания</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p>Телефон: +7 (495) 777-99-88</p>
+                    <p>Email: info@utair.ru</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Социальные сети</h4>
+                    <p>Следите за нами в соцсетях</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Яндекс.Карты API -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    
+    <!-- Расширенные данные маршрутов ЮТэйр (все города) -->
+    <script src="src/js/utair-data-extended.js"></script>
+    
+    <!-- Базовые данные маршрутов ЮТэйр (резерв) -->
+    <script src="src/js/utair-data.js"></script>
+    
+    <!-- Main JS -->
+    <script src="src/js/main.js"></script>
+</body>
+</html>
